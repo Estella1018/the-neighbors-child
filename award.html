@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>楷模推薦專區｜黎安國 國民生活入口網</title>
+<link rel="icon" href="img/x-icon.ico" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+<div class="page">
+  <header id="site-top"></header>
+  <main class="sub-main">
+    <p class="crumb"><a href="index.html">首頁</a> ＞ 便民服務 ＞ 楷模推薦專區</p>
+    <h1>年度國民楷模　推薦專區</h1>
+
+    <section class="panel">
+      <p>您身邊有值得學習的「別人家的孩子」嗎？歡迎推薦，本署將立即核發獎狀。</p>
+      <form id="award-form">
+        <div class="form-row">
+          <label for="a-name">被推薦人姓名</label>
+          <input type="text" id="a-name" maxlength="8" required autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="a-title">稱謂</label>
+          <select id="a-title">
+            <option>同學</option><option selected>國民</option><option>先生</option><option>女士</option><option>小朋友</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="a-deed">優良事蹟</label>
+          <select id="a-deed">
+            <option>連續十二年獲得全年級第一名</option>
+            <option>從不讓父母擔心</option>
+            <option>全年無休，從未請假</option>
+            <option>從未說過一個「累」字</option>
+            <option>主動向師長報告同學的不當言論</option>
+            <option>每晚睡前完成國民日常自我檢核</option>
+            <option value="custom">自行填寫……</option>
+          </select>
+        </div>
+        <div class="form-row" id="custom-row" hidden>
+          <label for="a-custom">自行填寫事蹟</label>
+          <input type="text" id="a-custom" maxlength="24" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="a-from">推薦人（可不填）</label>
+          <input type="text" id="a-from" maxlength="8" autocomplete="off">
+        </div>
+        <button type="submit" class="btn">送出推薦，核發獎狀</button>
+      </form>
+    </section>
+
+    <section class="panel" id="result" hidden>
+      <h2>獎狀已核發</h2>
+      <div class="canvas-wrap"><canvas id="cert" width="1600" height="1131" aria-label="國民楷模獎狀"></canvas></div>
+      <p style="text-align:center"><button type="button" class="btn" id="save">下載獎狀</button></p>
+      <p class="fine">獎狀為虛構國家「黎安國」的遊戲道具，不具任何效力。請詳閱獎狀下方的受獎須知。</p>
+    </section>
+  </main>
+  <footer id="site-foot"></footer>
+</div>
+<script src="common.js?v=12"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  $('a-deed').addEventListener('change', function () {
+    $('custom-row').hidden = this.value !== 'custom';
+  });
+
+  $('award-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('result').hidden = false;
+    LIAN.fontsReady().then(draw);
+    $('result').scrollIntoView();
+  });
+
+  function draw() {
+    var c = $('cert'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+    var serif = '"Noto Serif TC", "PMingLiU", serif';
+    var name = $('a-name').value.trim();
+    var deed = $('a-deed').value === 'custom' ? ($('a-custom').value.trim() || '表現優異') : $('a-deed').value;
+    var from = $('a-from').value.trim();
+
+    // 紙
+    ctx.fillStyle = '#fbf6e6'; ctx.fillRect(0, 0, W, H);
+    // 外框：紅＋金雙框
+    ctx.strokeStyle = '#b0261c'; ctx.lineWidth = 26; ctx.strokeRect(40, 40, W - 80, H - 80);
+    ctx.strokeStyle = '#c9a64a'; ctx.lineWidth = 6; ctx.strokeRect(74, 74, W - 148, H - 148);
+    // 四角菱形
+    ctx.fillStyle = '#c9a64a';
+    [[74, 74], [W - 74, 74], [74, H - 74], [W - 74, H - 74]].forEach(function (p) {
+      ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(Math.PI / 4); ctx.fillRect(-16, -16, 32, 32); ctx.restore();
+    });
+
+    // 標題
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#b0261c';
+    ctx.font = '900 150px ' + serif;
+    ctx.fillText('獎　　狀', W / 2, 270);
+
+    // 內文
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = '700 64px ' + serif;
+    ctx.fillText(name + '　' + $('a-title').value, 200, 410);
+    ctx.font = '400 50px ' + serif;
+    var y = LIAN.wrap(ctx, '　　' + deed + '，表現優異，足為國民楷模。特頒此狀，以資鼓勵。', 200, 510, W - 400, 76);
+    if (from) {
+      ctx.font = '400 34px ' + serif; ctx.fillStyle = '#555';
+      ctx.fillText('推薦人：' + from, 200, y + 10);
+    }
+
+    // 署名與印
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = '700 44px ' + serif;
+    ctx.fillText('黎安國國民發展總署　署長', W - 240, 860);
+    ctx.font = '400 36px ' + serif;
+    ctx.fillText(LIAN.today(), W - 240, 920);
+    ctx.save();
+    ctx.translate(W - 155, 870);
+    ctx.rotate(-0.08);
+    ctx.globalAlpha = 0.85;
+    ctx.strokeStyle = '#c0281e'; ctx.lineWidth = 6;
+    ctx.strokeRect(-58, -58, 116, 116);
+    ctx.fillStyle = '#c0281e'; ctx.textAlign = 'center';
+    ctx.font = '900 38px ' + serif;
+    ctx.fillText('楷模', 0, -8);
+    ctx.fillText('之印', 0, 40);
+    ctx.restore();
+
+    // 受獎須知（很小）
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#7a6a50';
+    ctx.font = '400 21px ' + serif;
+    var fine = '受獎須知：受獎人應於次年度維持同等以上之表現；未能維持者，本狀自動失效，並列入家庭年度檢核紀錄。' +
+      '受獎人不得以本狀為由要求休息、放慢進度或認為自己已經足夠。本狀之榮譽屬於受獎人之家庭。';
+    LIAN.wrap(ctx, fine, 130, 1000, W - 260, 30);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#a89878';
+    ctx.font = '400 18px ' + serif;
+    ctx.fillText('虛構國家道具｜恐怖遊戲《別人家的孩子》', W - 110, 112);
+  }
+
+  $('save').addEventListener('click', function () {
+    LIAN.saveCanvas($('cert'), '國民楷模獎狀.png');
+  });
+})();
+</script>
+</body>
+</html>

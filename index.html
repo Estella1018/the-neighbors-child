@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>黎安國 國民生活入口網</title>
+<link rel="icon" href="img/x-icon.ico" type="image/png">
+<meta name="description" content="願你一生，都還可以更好。——《別人家的孩子》">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+
+<!-- 內容警告（國民須知） -->
+<div class="dlg-backdrop" id="cw" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="cw-title">
+    <div class="dlg-bar"><span id="cw-title">國民須知</span><button type="button" class="dlg-x" aria-label="關閉">×</button></div>
+    <div class="dlg-body">
+      <p class="dlg-icon" aria-hidden="true">!</p>
+      <div>
+        <p><b>本網站為恐怖遊戲《別人家的孩子》的官方網站。</b></p>
+        <p>遊戲與本網站含有以下內容：電擊矯正、家庭暴力、精神控制，以及間接呈現的自殺。</p>
+        <p>如果你最近狀況不好，請先照顧自己。離開也沒有關係。</p>
+      </div>
+    </div>
+    <div class="dlg-btns">
+      <button type="button" class="btn" id="cw-ok">我已了解，進入本站</button>
+      <button type="button" class="btn" id="cw-leave">離開</button>
+    </div>
+  </div>
+</div>
+
+<!-- 第四次以後的系統訊息 -->
+<div class="dlg-backdrop" id="sys" hidden>
+  <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="sys-title">
+    <div class="dlg-bar"><span id="sys-title">系統訊息</span><button type="button" class="dlg-x" aria-label="關閉">×</button></div>
+    <div class="dlg-body">
+      <p class="dlg-icon" aria-hidden="true">i</p>
+      <div>
+        <p>系統偵測到您已第 <b id="sys-n">4</b> 次瀏覽本網站。</p>
+        <p>長時間停留在同一個地方，是安於現狀的徵兆。</p>
+        <p>是否為您預約最近的保養中心？</p>
+      </div>
+    </div>
+    <div class="dlg-btns">
+      <button type="button" class="btn sys-ok">確定</button>
+      <button type="button" class="btn sys-ok">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 外面頻道 -->
+<div class="dlg-backdrop" id="out" hidden>
+  <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="out-title">
+    <div class="dlg-bar"><span id="out-title">收訊異常</span><button type="button" class="dlg-x" aria-label="關閉">×</button></div>
+    <div class="dlg-body">
+      <p class="dlg-icon" aria-hidden="true">?</p>
+      <div>
+        <p>外面充滿失敗的人。</p>
+        <p>你是否要離開黎安國？</p>
+      </div>
+    </div>
+    <div class="dlg-btns">
+      <button type="button" class="btn" id="out-no">否</button>
+      <button type="button" class="btn" id="out-yes">是</button>
+    </div>
+  </div>
+</div>
+
+<!-- 通用公告 -->
+<div class="dlg-backdrop" id="notice" hidden>
+  <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="notice-title">
+    <div class="dlg-bar"><span id="notice-title">系統公告</span><button type="button" class="dlg-x" aria-label="關閉">×</button></div>
+    <div class="dlg-body">
+      <p class="dlg-icon" aria-hidden="true">!</p>
+      <div id="notice-body"></div>
+    </div>
+    <div class="dlg-btns"><button type="button" class="btn" id="notice-ok">確定</button></div>
+  </div>
+</div>
+
+<!-- 首長信箱 -->
+<div class="dlg-backdrop" id="mail" hidden>
+  <div class="dlg dlg-wide" role="dialog" aria-modal="true" aria-labelledby="mail-title">
+    <div class="dlg-bar"><span id="mail-title">首長信箱</span><button type="button" class="dlg-x" aria-label="關閉">×</button></div>
+    <form class="mail-form" id="mail-form">
+      <p class="mail-hint">歡迎國民踴躍提供建言。來信將於一個工作天內回覆。</p>
+      <label>姓名<input name="name" maxlength="20" autocomplete="off" required></label>
+      <label>主旨<input name="subject" maxlength="40" autocomplete="off" required></label>
+      <label>內容<textarea name="body" rows="5" maxlength="400" required></textarea></label>
+      <div class="dlg-btns">
+        <button type="submit" class="btn">送出</button>
+        <button type="button" class="btn" id="mail-cancel">取消</button>
+      </div>
+    </form>
+    <div class="mail-reply" id="mail-reply" hidden>
+      <div class="mail-paper" id="mail-paper"></div>
+      <div class="dlg-btns"><button type="button" class="btn" id="mail-close">關閉</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="curfew" id="curfew" aria-hidden="true"></div>
+<div class="watch" id="watch" aria-hidden="true"></div>
+<canvas class="noise" id="noise" width="200" height="120" aria-hidden="true"></canvas>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<!-- 衝進電視之後：轉台＋雜訊（接著在外面那頁鎖定訊號） -->
+<div class="tune" id="tune" aria-hidden="true" hidden>
+  <canvas id="tune-noise" width="200" height="120"></canvas>
+  <div class="tune-band"></div>
+  <div class="tune-peek"><b>別人家的孩子</b><small>THE NEIGHBOR’S CHILD</small></div>
+  <p class="tune-osd">CH 06</p>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="warp" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence id="warp-t" type="fractalNoise" baseFrequency="0.004 0.09" numOctaves="1" seed="3"/>
+    <feDisplacementMap id="warp-d" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="page">
+
+  <header class="top">
+    <div class="top-links">
+      <a href="index.html">回首頁</a>｜<a href="sitemap.html">網站導覽</a>｜<a href="en.html">English</a>｜<a href="kids.html">兒童版</a>
+    </div>
+    <div class="banner">
+      <img class="emblem" src="img/emblem.png?v=2" alt="">
+      <div>
+        <h1>黎安國　國民生活入口網</h1>
+        <p class="sub">Republic of Li-An ‧ National Life Portal</p>
+      </div>
+      <p class="greeting" id="greeting">願你一生，都還可以更好。</p>
+    </div>
+    <nav class="nav" aria-label="主選單">
+      <a href="index.html" class="on">首　頁</a>
+      <a href="about.html">認識黎安國</a>
+      <a href="news.html">最新消息</a>
+      <a href="services.html">便民服務</a>
+      <a href="downloads.html">下載專區</a>
+      <a href="#mail" class="mail-link">首長信箱</a>
+    </nav>
+    <div class="marquee" id="marquee">
+      <span class="mq-label">最新消息</span>
+      <div class="mq-track" title="點一下可暫停">
+        <p class="mq-secret" id="mq-secret" aria-hidden="true">停下來，也沒有關係。</p>
+        <p class="mq-text" id="mq-text">
+          ★ 本月國民幸福指數：<b class="hi">99.8%</b>，連續二十年全球第一 ★
+          本週重點巡查戶：光榮大樓 <b class="patrol">七樓三號</b>，請鄰里協助關心 ★
+          年度國民楷模頒獎典禮　即日起受理推薦 ★
+          保養中心延長服務時間，歡迎全家一同預約 ★
+          願你一生，都還可以更好。 ★
+        </p>
+      </div>
+      <button type="button" class="mq-pause" id="mq-pause" aria-pressed="false">暫停</button>
+    </div>
+  </header>
+
+  <div class="cols">
+
+    <!-- 左欄 -->
+    <aside class="left">
+      <div class="box">
+        <h2 class="box-h">便民服務</h2>
+        <ul class="menu">
+          <li><a href="about.html">認識黎安國</a></li>
+          <li><a href="checkup.html">國民成長檢核</a><span class="new-tag">NEW</span></li>
+          <li><a href="care.html" id="care-link">保養中心預約</a></li>
+          <li><a href="award.html">楷模推薦專區</a></li>
+          <li><a href="badge.html">光榮徽章申請</a></li>
+          <li><a href="media/handbook.pdf" download="國民成長手冊_第27版_節錄.pdf">下載專區</a></li>
+          <li><a href="faq.html">常見問答</a></li>
+          <li><a href="#mail" class="mail-link">首長信箱</a></li>
+        </ul>
+      </div>
+      <div class="box">
+        <h2 class="box-h">相關連結</h2>
+        <label class="sr" for="rel">相關網站連結</label>
+        <select id="rel" class="rel">
+          <option>－－相關網站連結－－</option>
+          <option value="care.html">國民保養中心</option>
+          <option value="downloads.html">國民教育署</option>
+          <option value="award.html">年度國民楷模委員會</option>
+          <option value="badge.html">光榮大樓管理委員會</option>
+        </select>
+      </div>
+      <div class="box badge">
+        <div class="badge-pic" id="badge-pic">
+          <img src="img/door_badge.jpg" alt="門上掛著的光榮徽章">
+          <span class="nameplate" aria-hidden="true">林品睿</span>
+        </div>
+        <p id="badge-text">本站無失敗成員</p>
+      </div>
+    </aside>
+
+    <!-- 中欄 -->
+    <main class="mid">
+      <section class="box">
+        <h2 class="box-h">最新消息 <a class="more" href="news.html">more…</a></h2>
+        <table class="news">
+          <thead><tr><th scope="col">日期</th><th scope="col">標題</th><th scope="col">發布單位</th></tr></thead>
+          <tbody>
+            <tr><td>11/14</td><td><a href="news.html#n1" id="news-award">年度國民楷模頒獎典禮　即日起受理推薦</a><span class="new-tag">NEW</span></td><td>楷模委員會</td></tr>
+            <tr><td>11/12</td><td><a href="news.html#n2">本月國民幸福指數 99.8%，再創新高</a><span class="new-tag">NEW</span></td><td>國民生活部</td></tr>
+            <tr><td>11/10</td><td><a href="news.html#n3">本週重點巡查戶公告（光榮大樓 <span class="patrol">七樓三號</span>）</a></td><td>里辦公處</td></tr>
+            <tr><td>11/08</td><td><a href="news.html#n4">保養中心延長服務時間，歡迎全家預約</a></td><td>國民保養中心</td></tr>
+            <tr><td>11/05</td><td><a href="news.html#n5">《國民成長手冊》第 27 版開放下載</a></td><td>國民教育署</td></tr>
+            <tr><td>11/01</td><td><a href="news.html#n6">提醒您：「外面」相關謠言請勿轉傳</a></td><td>國民生活部</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="box">
+        <h2 class="box-h">影音專區　國民電視台</h2>
+        <div class="tv">
+          <div class="tv-bezel">
+            <div class="tv-screen" id="tv-screen">
+              <img class="tv-still" id="tv-still" src="img/tv_model_bow.jpg" alt="">
+              <video class="tv-video" id="tv-video" muted loop playsinline preload="none"></video>
+              <canvas class="tv-snow" id="tv-snow" width="160" height="90"></canvas>
+              <div class="tv-outside" id="tv-outside" aria-hidden="true">
+                <img id="tv-outside-img" src="img/outside_1.jpg" alt="">
+              </div>
+              <p class="tv-osd" id="tv-osd">CH 1</p>
+              <p class="tv-ticker" id="tv-ticker">年度國民楷模頒獎典禮　精彩回顧</p>
+              <button type="button" class="tv-hit" id="tv-hit" aria-label="電視畫面" tabindex="-1"></button>
+            </div>
+            <div class="tv-panel">
+              <span class="tv-brand">國民牌</span>
+              <div class="tv-ch" role="group" aria-label="轉台">
+                <button type="button" data-ch="1">1</button>
+                <button type="button" data-ch="2">2</button>
+                <button type="button" data-ch="3">3</button>
+                <button type="button" data-ch="4">4</button>
+                <button type="button" data-ch="5">5</button>
+                <button type="button" data-ch="6">6</button>
+                <button type="button" id="tv-sound" aria-pressed="false">聲音</button>
+              </div>
+            </div>
+          </div>
+          <p class="cap" id="tv-cap">CH 1　國民楷模頒獎典禮</p>
+        </div>
+      </section>
+
+      <section class="box">
+        <h2 class="box-h">榮譽榜</h2>
+        <div class="honor">
+          <figure>
+            <img src="img/ch2_flyer_model.jpg" alt="本月模範生公告：二年三班林品睿同學">
+            <figcaption>本月模範生：二年三班 林品睿 同學</figcaption>
+          </figure>
+          <figure>
+            <img src="img/ch2_cu_honor.jpg" alt="全年級第一名林品睿的榮譽榜">
+            <figcaption>全年級榮譽榜</figcaption>
+          </figure>
+          <figure>
+            <img src="img/ch2_flyer_exam.jpg" alt="段考倒數十二天的補習班傳單">
+            <figcaption>距離第二次段考還有 12 天</figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <!-- 右欄 -->
+    <aside class="right">
+      <div class="box sysbox" id="sysbox" hidden>
+        <h2 class="box-h">系統公告</h2>
+        <p class="note">偵測到網站異常，請協助修正。<br>已修正：<b id="fix-n">0</b>／<span id="fix-total">7</span></p>
+      </div>
+      <div class="box index">
+        <h2 class="box-h">國民幸福指數</h2>
+        <p class="big" id="happy">99.8<small>%</small></p>
+        <p class="note" id="happy-note">本月統計｜連續二十年第一</p>
+      </div>
+      <div class="box">
+        <h2 class="box-h">本週重點巡查戶</h2>
+        <p class="patrol-box">光榮大樓<br><b class="patrol">七樓三號</b></p>
+        <p class="note">請鄰里多加關心。發現異狀，請撥 <b>1999</b>。</p>
+      </div>
+      <div class="box">
+        <h2 class="box-h">下載專區</h2>
+        <a href="media/handbook.pdf" class="dl" download="國民成長手冊_第27版_節錄.pdf">
+          <img src="img/manual_1.jpg" alt="玻璃櫃裡的國民成長手冊與獎盃">
+          <span>《國民成長手冊》<br>第 27 版節錄（PDF）</span>
+        </a>
+      </div>
+      <div class="box">
+        <h2 class="box-h">每日一句</h2>
+        <p class="quote" id="quote">休息，是給輸的人的。</p>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <p class="counter">您是第 <span class="digits" id="digits">1145141919810</span> 位訪客</p>
+    <p>黎安國 國民生活部　版權所有 © 黎安國政府　地址：光榮路一段 1 號　服務時間：全年無休</p>
+    <p class="small">本網站最佳瀏覽解析度 800×600　建議使用 IE 5.0 以上版本瀏覽　最後更新日期：<span id="upd">2026/11/14</span></p>
+    <p class="small real">本網站為遊戲《別人家的孩子》的虛構官網，黎安國與其中所有機關、人物皆為虛構。</p>
+  </footer>
+</div>
+
+<script src="site.js?v=12"></script>
+</body>
+</html>

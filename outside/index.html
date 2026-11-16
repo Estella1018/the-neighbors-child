@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>別人家的孩子 The Neighbor’s Child｜開發日誌</title>
+<link rel="icon" href="../img/x-icon.ico" type="image/png">
+<meta name="description" content="心理恐怖解謎遊戲《別人家的孩子》的官方網站與開發日誌。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="outside.css?v=6">
+<script>
+  // 從黎安國的電視鑽進來的：先不顯示白光和倒數片頭，改成接續雜訊、鎖定訊號
+  try {
+    var tvT = +sessionStorage.getItem('lian_tv');
+    if (tvT && Date.now() - tvT < 15000) document.documentElement.classList.add('from-tv');
+    sessionStorage.removeItem('lian_tv');
+  } catch (e) {}
+</script>
+</head>
+<body class="counting">
+<div class="arrive" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- 收訊：剛進來時鎖定訊號；停留時偶爾不穩 -->
+<div class="signal" id="signal" aria-hidden="true">
+  <canvas id="sig-noise" width="200" height="120"></canvas>
+  <img class="sig-lian" id="sig-lian" src="img/lian.jpg" alt="">
+  <p class="sig-osd" id="sig-osd">CH 06</p>
+</div>
+<div class="residue" id="residue" aria-hidden="true"></div>
+
+<!-- 倒數片頭 -->
+<div class="countdown" id="countdown" aria-hidden="true">
+  <div class="cd-ring">
+    <div class="cd-sweep" id="cd-sweep"></div>
+    <span class="cd-n" id="cd-n">5</span>
+  </div>
+  <button type="button" class="cd-skip" id="cd-skip">略過片頭</button>
+</div>
+
+<a class="back" href="../">← 回到黎安國</a>
+
+<div class="hud">
+  <span class="hud-frame" id="hud-frame" aria-hidden="true">FRAME 001 / 010</span>
+  <button type="button" class="hud-btn" id="index-btn" aria-haspopup="dialog">索引 ▦</button>
+</div>
+<button type="button" class="sound-btn" id="sound-btn" aria-pressed="false">外面的聲音　關</button>
+
+<!-- 片頭 -->
+<header class="intro" id="top">
+  <p class="slate">REEL 00 ─ 外面</p>
+  <h1 class="title"><span>別人家的孩子</span><small>The Neighbor’s Child</small></h1>
+  <p class="tagline">一款心理恐怖解謎遊戲的開發紀錄。<br>每一格，都是做這款遊戲的某一天。</p>
+  <p class="cue" aria-hidden="true">往下捲動，穿過每一格 ↓</p>
+</header>
+
+<!-- 日誌隧道：往下捲＝往前穿過 -->
+<section class="tunnel" id="tunnel" aria-label="開發日誌">
+  <div class="stage" id="stage">
+    <div class="space" id="space"></div>
+  </div>
+</section>
+
+<!-- 關於這部作品 -->
+<section class="about" id="about">
+  <p class="slate">REEL ∞ ─ 關於這部作品</p>
+  <h2 class="reveal" id="reveal">在一個把「還可以更好」當成信仰的國家，所有人都在看著你。</h2>
+  <p class="lead">直到你變成大家期待的樣子。</p>
+  <dl class="specs">
+    <div><dt>類型</dt><dd>規則怪談 × 密室逃脫 × 心理恐怖</dd></div>
+    <div><dt>玩法</dt><dd>2D 定點、點擊式解謎；多結局</dd></div>
+    <div><dt>平台</dt><dd>電腦（PC）；試玩版可在瀏覽器遊玩</dd></div>
+    <div><dt>內容提醒</dt><dd>含電擊矯正、家庭暴力、精神控制，以及間接呈現的自殺</dd></div>
+  </dl>
+  <p><a class="play" href="https://estella-violet.itch.io/the-neighbors-child" target="_blank" rel="noopener">遊玩試玩版（itch.io）</a></p>
+</section>
+
+<!-- 片尾名單 -->
+<footer class="credits" id="credits">
+  <div class="roll">
+    <p class="role">企劃・劇本・美術・程式</p><p class="name">桃之夭夭</p>
+    <p class="role">特別感謝</p><p class="name">每一個曾經被拿來比較的孩子</p>
+    <p class="end">謝謝你來到外面。</p>
+  </div>
+</footer>
+
+<!-- 索引：整卷底片 -->
+<div class="index" id="index" role="dialog" aria-modal="true" aria-label="日誌索引" hidden>
+  <div class="index-head">
+    <p class="slate">INDEX ─ 整卷底片</p>
+    <button type="button" class="hud-btn" id="index-close">回到隧道 ✕</button>
+  </div>
+  <div class="strip" id="strip"></div>
+  <p class="index-hint">左右捲動，點一格展開那一天的日誌</p>
+</div>
+
+<!-- 放映：點一格展開 -->
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="v-title" hidden>
+  <div class="v-scroll" id="v-scroll">
+    <div class="v-screen" id="v-screen">
+      <img id="v-img" alt="">
+    </div>
+    <article class="v-log" id="v-log">
+      <p class="v-meta"><span id="v-no"></span><span id="v-date"></span><span id="v-reel"></span><span class="v-sample">範例內容</span></p>
+      <h2 id="v-title"></h2>
+      <div id="v-body"></div>
+      <nav class="v-nav">
+        <button type="button" id="v-prev">← 上一格</button>
+        <button type="button" id="v-next">下一格 →</button>
+      </nav>
+    </article>
+  </div>
+  <button type="button" class="v-close" id="v-close" aria-label="關閉，回到原本的地方">✕</button>
+</div>
+
+<script src="logs.js?v=1"></script>
+<script src="reel.js?v=4"></script>
+</body>
+</html>

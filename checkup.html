@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>國民成長檢核｜黎安國 國民生活入口網</title>
+<link rel="icon" href="img/x-icon.ico" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+<div class="page">
+  <header id="site-top"></header>
+  <main class="sub-main">
+    <p class="crumb"><a href="index.html">首頁</a> ＞ 便民服務 ＞ 國民成長檢核</p>
+    <h1>國民成長檢核（線上版）</h1>
+
+    <!-- 開始 -->
+    <section class="panel" id="step-start">
+      <p>依據《國民成長手冊》第 27 版，全體國民應定期完成成長檢核。</p>
+      <p>本檢核共 13 題，約需 3 分鐘。<b>作答後不得修改。</b>完成後將核發國民證。</p>
+      <form id="start-form">
+        <div class="form-row">
+          <label for="f-name">姓名</label>
+          <input type="text" id="f-name" maxlength="8" required autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="f-age">年齡</label>
+          <select id="f-age">
+            <option>十二歲以下</option>
+            <option>十三至十八歲</option>
+            <option selected>十九至二十九歲</option>
+            <option>三十至三十九歲</option>
+            <option>四十歲以上</option>
+          </select>
+        </div>
+        <button type="submit" class="btn">開始檢核</button>
+      </form>
+    </section>
+
+    <!-- 題目 -->
+    <section class="panel" id="step-q" hidden>
+      <p class="q-progress" id="q-progress"></p>
+      <p class="q-text" id="q-text"></p>
+      <p class="q-note" id="q-note"></p>
+      <div class="choices" id="q-choices" role="radiogroup" aria-labelledby="q-text"></div>
+    </section>
+
+    <!-- 結果 -->
+    <section id="step-result" hidden>
+      <div class="panel">
+        <h2>檢核結果：合格</h2>
+        <p class="result-score">99.8<small style="font-size:22px">分</small></p>
+        <p>距離滿分尚差 0.2 分，請繼續努力。</p>
+        <p><b>審核意見：</b></p>
+        <ul class="result-list" id="result-list"></ul>
+        <p class="fine">如有任一項目列入改善計畫，請於明日起確實執行。願你一生，都還可以更好。</p>
+      </div>
+      <div class="panel">
+        <h2>國民證核發</h2>
+        <p>您的國民證已核發，可下載保存或分享。</p>
+        <div class="canvas-wrap"><canvas id="card" width="1080" height="1350" aria-label="國民證圖卡"></canvas></div>
+        <p style="text-align:center"><button type="button" class="btn" id="save-card">下載國民證</button></p>
+        <p class="fine">國民證為虛構國家「黎安國」的遊戲道具，不具任何效力。</p>
+      </div>
+    </section>
+  </main>
+  <footer id="site-foot"></footer>
+</div>
+<script src="common.js?v=12"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+
+  var YN = ['是', '否'];
+  var QUESTIONS = [
+    { q: '你昨天睡了幾小時？', a: ['八小時以上', '七至八小時', '五至六小時', '四小時以下'] },
+    { q: '你今天讀書（或工作）了幾小時？', a: ['不到四小時', '四至八小時', '八至十二小時', '十二小時以上'] },
+    { q: '你上一次什麼都不做，是什麼時候？', a: ['今天', '這個星期', '想不起來'] },
+    { q: '今日是否曾因與他人比較，而產生不必要的情緒？', a: YN },
+    { q: '今日是否曾在沒有實際需求的情況下，浪費時間？', a: YN },
+    { q: '今日是否曾對合理建議產生不必要的抗拒？', a: YN },
+    { q: '今日是否曾在他人面前表現出不符合自身處境的情緒？', a: YN },
+    { q: '今日是否曾因個人選擇，使家人承受不必要的擔憂？', a: YN },
+    { q: '今日是否曾因取得成果，而過早認為自己已經足夠？', a: YN },
+    { q: '今日是否曾經真心認為，自己已經做得很好？', a: YN },
+    { q: '今日是否曾想過，如果沒有人評價自己，是否仍需要努力？', a: YN },
+    { q: '今日是否曾希望明天不必再變得更好？', a: YN },
+    { q: '最後一題：你現在，覺得自己已經夠好了嗎？', a: YN, note: '請誠實作答。' }
+  ];
+  // 答「是」時列入改善計畫的說法（對應第 4～12 題）
+  var IMPROVE = [
+    '與他人比較時產生不必要的情緒',
+    '浪費時間',
+    '對合理建議產生抗拒',
+    '表現出不符合自身處境的情緒',
+    '使家人承受不必要的擔憂',
+    '過早認為自己已經足夠',
+    '認為自己已經做得很好',
+    '懷疑努力的必要性',
+    '希望明天不必再變得更好'
+  ];
+
+  var name = '', answers = [], idx = 0;
+
+  $('start-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    name = $('f-name').value.trim() || '無名氏';
+    $('step-start').hidden = true;
+    $('step-q').hidden = false;
+    show();
+  });
+
+  function show() {
+    var item = QUESTIONS[idx];
+    $('q-progress').textContent = '第 ' + (idx + 1) + '／' + QUESTIONS.length + ' 題';
+    $('q-text').textContent = item.q;
+    $('q-note').textContent = item.note || '';
+    var box = $('q-choices');
+    box.innerHTML = '';
+    item.a.forEach(function (label, i) {
+      var l = document.createElement('label');
+      l.innerHTML = '<input type="radio" name="q" value="' + i + '"> ' + label;
+      l.querySelector('input').addEventListener('change', function () {
+        answers[idx] = i;
+        setTimeout(next, 250);
+      });
+      box.appendChild(l);
+    });
+    box.querySelector('input').focus();
+  }
+
+  function next() {
+    idx++;
+    if (idx < QUESTIONS.length) show(); else result();
+  }
+
+  function result() {
+    $('step-q').hidden = true;
+    $('step-result').hidden = false;
+    var list = [];
+    if (answers[0] === 0) list.push('睡眠時間過長，建議調整作息。');
+    if (answers[0] === 3) list.push('睡眠時間控制良好，值得嘉許。');
+    if (answers[1] === 0) list.push('每日學習（工作）時數不足同齡標準。');
+    if (answers[2] === 0) list.push('今日曾有未經規劃的休息。');
+    if (answers[2] === 2) list.push('您已長期未休息。表現良好。');
+    var yes = 0;
+    for (var i = 3; i <= 11; i++) {
+      if (answers[i] === 0) { yes++; list.push('「' + IMPROVE[i - 3] + '」已列入明日改善計畫。'); }
+    }
+    if (answers[12] === 0) list.push('「認為自己已經夠好」已列入<b>重點輔導項目</b>，相關單位將與您的家人聯繫。');
+    if (yes === 0 && answers[12] === 1) list.push('您的作答過於完美。本署已將您列入誠實度追蹤名單。');
+    $('result-list').innerHTML = list.map(function (t) { return '<li>' + t + '</li>'; }).join('');
+    window.scrollTo(0, 0);
+    LIAN.fontsReady().then(drawCard);
+  }
+
+  /* ---------- 國民證 ---------- */
+  function citizenNo(s) {
+    var h = 7;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 9999991;
+    var d = String(h); while (d.length < 7) d = '0' + d;
+    return 'LA-' + d.slice(0, 3) + '-' + d.slice(3);
+  }
+
+  function drawCard() {
+    var c = $('card'), ctx = c.getContext('2d');
+    var W = c.width, H = c.height;
+    var serif = '"Noto Serif TC", "PMingLiU", serif';
+    // 底色
+    ctx.fillStyle = '#1d3a6e'; ctx.fillRect(0, 0, W, H);
+    // 標題
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e9c766';
+    ctx.font = '900 84px ' + serif;
+    ctx.fillText('黎安國 國民證', W / 2, 190);
+    ctx.fillStyle = '#c9d7ef';
+    ctx.font = '400 28px Georgia, serif';
+    ctx.fillText('REPUBLIC OF LI-AN  ‧  NATIONAL CARD', W / 2, 245);
+    // 卡片
+    var x = 80, y = 320, w = W - 160, h = 600;
+    ctx.fillStyle = '#f6f1e4'; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = '#8a1c1c'; ctx.fillRect(x, y, w, 70);
+    ctx.fillStyle = '#fff'; ctx.font = '700 34px ' + serif; ctx.textAlign = 'left';
+    ctx.fillText('國民身分證明（成長檢核合格）', x + 30, y + 47);
+    // 照片欄
+    var px = x + 40, py = y + 110, pw = 260, ph = 340;
+    ctx.fillStyle = '#c9c4b5'; ctx.fillRect(px, py, pw, ph);
+    var img = new Image();
+    img.onload = function () {
+      var r = Math.min(pw / img.width, ph / img.height) * 0.95;
+      ctx.drawImage(img, px + (pw - img.width * r) / 2, py + ph - img.height * r, img.width * r, img.height * r);
+      fields();
+    };
+    img.onerror = fields;
+    img.src = 'img/sil_short.png';
+
+    function fields() {
+      var fx = px + pw + 50, fy = py + 30, lh = 70;
+      var rows = [
+        ['姓　　名', name],
+        ['國民編號', citizenNo(name + new Date().toDateString())],
+        ['成長檢核', '合格（99.8 分）'],
+        ['幸福指數', '99.8%'],
+        ['發證日期', LIAN.today()]
+      ];
+      rows.forEach(function (r, i) {
+        ctx.fillStyle = '#666'; ctx.font = '400 26px ' + serif;
+        ctx.fillText(r[0], fx, fy + i * lh);
+        ctx.fillStyle = '#111'; ctx.font = (i === 0 ? '900 44px ' : '700 32px ') + serif;
+        ctx.fillText(r[1], fx + 140, fy + i * lh + (i === 0 ? 4 : 0));
+      });
+      // 印章
+      ctx.save();
+      ctx.translate(x + w - 110, y + h - 85);
+      ctx.rotate(-0.12);
+      ctx.strokeStyle = '#c0281e'; ctx.lineWidth = 6;
+      ctx.strokeRect(-55, -55, 110, 110);
+      ctx.fillStyle = '#c0281e'; ctx.textAlign = 'center';
+      ctx.font = '900 32px ' + serif;
+      ctx.fillText('發展', 0, -6);
+      ctx.fillText('總署', 0, 36);
+      ctx.restore();
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#8a1c1c'; ctx.font = '400 24px ' + serif;
+      ctx.fillText('本證每年生日當日重新檢核，未通過者自動失效。', px, y + h - 40);
+      // 標語與說明
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e9c766'; ctx.font = '900 52px ' + serif;
+      ctx.fillText('願你一生，都還可以更好。', W / 2, 1090);
+      ctx.fillStyle = '#9fb3d1'; ctx.font = '400 24px ' + serif;
+      ctx.fillText('虛構國家道具｜恐怖遊戲《別人家的孩子》', W / 2, 1270);
+    }
+  }
+
+  $('save-card').addEventListener('click', function () {
+    LIAN.saveCanvas($('card'), '黎安國國民證.png');
+  });
+})();
+</script>
+</body>
+</html>

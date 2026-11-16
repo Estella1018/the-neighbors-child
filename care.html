@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>保養中心預約｜黎安國 國民生活入口網</title>
+<link rel="icon" href="img/x-icon.ico" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+<div class="page">
+  <header id="site-top"></header>
+  <main class="sub-main">
+    <p class="crumb"><a href="index.html">首頁</a> ＞ 便民服務 ＞ 保養中心預約</p>
+    <h1>國民保養中心　線上預約</h1>
+
+    <section class="panel" id="step-cal">
+      <p>內心和汽車一樣，需要定期保養。保養紀錄將回報家人與學校，請安心預約。</p>
+      <p class="fine">本週預約踴躍，多數時段已額滿，造成不便敬請見諒。</p>
+      <table class="slots" id="slots"></table>
+    </section>
+
+    <section class="panel" id="step-form" hidden>
+      <h2 id="form-when"></h2>
+      <form id="care-form">
+        <div class="form-row">
+          <label for="c-name">受保養人姓名</label>
+          <input type="text" id="c-name" maxlength="8" required autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="c-why">保養原因</label>
+          <select id="c-why">
+            <option>定期保養</option>
+            <option>情緒管理</option>
+            <option>成績下滑</option>
+            <option>家長建議</option>
+            <option>學校轉介</option>
+            <option disabled>其他（此選項暫停開放）</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label><input type="checkbox" required> 本人同意保養紀錄回報家人與學校</label>
+        </div>
+        <button type="submit" class="btn">確認預約</button>
+        <button type="button" class="btn" id="back">重新選擇</button>
+      </form>
+    </section>
+
+    <section id="step-slip" hidden>
+      <div class="slip">
+        <h2>國民保養中心　預約單</h2>
+        <p>預約編號：<span class="no" id="slip-no"></span></p>
+        <p>受保養人：<b id="slip-name"></b></p>
+        <p>預約時間：<b id="slip-when"></b></p>
+        <p>保養原因：<span id="slip-why"></span></p>
+        <p>地　　點：國民保養中心　第七分站（請由後門進入）</p>
+        <p><b>注意事項</b></p>
+        <ol>
+          <li>請由家長或監護人陪同。</li>
+          <li>請勿攜帶手機及私人物品。</li>
+          <li>本預約一經確認，不得取消。</li>
+          <li>保養完成後，將於《國民保養手冊》加蓋「已保養」章。</li>
+          <li>如未依約到場，將由相關單位主動聯繫。</li>
+        </ol>
+      </div>
+      <p style="text-align:center"><button type="button" class="btn" onclick="window.print()">列印預約單</button></p>
+      <p class="fine" style="text-align:center">本預約單為虛構國家「黎安國」的遊戲道具。</p>
+    </section>
+  </main>
+  <footer id="site-foot"></footer>
+</div>
+<script src="common.js?v=12"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  // 預約編號：之後若要對應遊戲內的密碼，改這裡（交辦總表有記）
+  var CARE_CODE = '0300-0704';
+  var TIMES = ['03:00', '09:00', '11:00', '14:00', '16:00', '19:00'];
+  var WEEK = '日一二三四五六';
+  var now = new Date(), days = [];
+  for (var i = 1; i <= 7; i++) days.push(new Date(now.getFullYear(), now.getMonth(), now.getDate() + i));
+
+  var html = '<thead><tr><th scope="col">時段</th>' + days.map(function (d) {
+    return '<th scope="col">' + (d.getMonth() + 1) + '/' + d.getDate() + '<br>（' + WEEK[d.getDay()] + '）</th>';
+  }).join('') + '</tr></thead><tbody>';
+  TIMES.forEach(function (t) {
+    html += '<tr><th scope="row">' + t + '</th>';
+    days.forEach(function (d, di) {
+      html += t === '03:00'
+        ? '<td class="open"><button type="button" data-d="' + di + '">可預約</button></td>'
+        : '<td class="full">額滿</td>';
+    });
+    html += '</tr>';
+  });
+  $('slots').innerHTML = html + '</tbody>';
+
+  var chosen;
+  $('slots').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-d]');
+    if (!b) return;
+    var d = days[+b.dataset.d];
+    chosen = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日（' + WEEK[d.getDay()] + '）凌晨 03:00';
+    $('form-when').textContent = '預約時段：' + chosen;
+    $('step-cal').hidden = true;
+    $('step-form').hidden = false;
+    $('c-name').focus();
+  });
+  $('back').addEventListener('click', function () {
+    $('step-form').hidden = true;
+    $('step-cal').hidden = false;
+  });
+  $('care-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('slip-no').textContent = CARE_CODE;
+    $('slip-name').textContent = $('c-name').value.trim();
+    $('slip-when').textContent = chosen;
+    $('slip-why').textContent = $('c-why').value;
+    $('step-form').hidden = true;
+    $('step-slip').hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

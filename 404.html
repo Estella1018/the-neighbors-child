@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>……</title>
+<link rel="icon" href="img/x-icon.ico" type="image/png">
+<style>
+  /* 404：外面的殘影。和藍色的入口網完全相反：暖、過曝、像夢 */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    color: #6b5a4a;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    background: #f7e9d7;
+  }
+  .haze {
+    position: fixed; inset: -20%;
+    background:
+      radial-gradient(circle at 30% 40%, #fff7e8 0 12%, transparent 38%),
+      radial-gradient(circle at 72% 58%, #ffd9c2 0 10%, transparent 42%),
+      radial-gradient(circle at 50% 85%, #d8ecf2 0 8%, transparent 40%),
+      #f3e2cc;
+    filter: blur(18px);
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from { transform: translate(-2%, -1%) scale(1); }
+    to   { transform: translate(2%, 1%) scale(1.06); }
+  }
+  .orb {
+    position: fixed; border-radius: 50%;
+    background: rgba(255, 255, 255, .55);
+    filter: blur(6px);
+    animation: float 14s ease-in-out infinite;
+  }
+  @keyframes float { 50% { transform: translateY(-24px); opacity: .5; } }
+  main {
+    position: relative;
+    height: 100%;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    padding: 24px;
+  }
+  h1 { font-weight: 400; font-size: clamp(22px, 4vw, 34px); letter-spacing: .25em; margin: 0 0 18px; }
+  p { margin: 0 0 10px; font-size: 16px; letter-spacing: .12em; line-height: 1.8; }
+  .slow { opacity: 0; animation: appear 3s ease forwards; }
+  .d1 { animation-delay: 1.5s; } .d2 { animation-delay: 4s; } .d3 { animation-delay: 7s; }
+  @keyframes appear { to { opacity: 1; } }
+  a { color: #b06a4a; text-decoration: none; border-bottom: 1px solid currentColor; }
+  a:focus-visible { outline: 2px solid #b06a4a; outline-offset: 4px; }
+  .links { margin-top: 26px; display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+  @media (prefers-reduced-motion: reduce) {
+    .haze, .orb { animation: none; }
+    .slow { opacity: 1; animation: none; }
+  }
+  body { -webkit-user-select: none; user-select: none; }
+</style>
+</head>
+<body>
+<div class="haze" aria-hidden="true"></div>
+<div class="orb" style="width:120px;height:120px;left:12%;top:18%" aria-hidden="true"></div>
+<div class="orb" style="width:60px;height:60px;right:18%;top:30%;animation-delay:-5s" aria-hidden="true"></div>
+<div class="orb" style="width:90px;height:90px;left:60%;bottom:12%;animation-delay:-9s" aria-hidden="true"></div>
+<main>
+  <h1>這個頁面不存在。</h1>
+  <p class="slow d1">……可是，你好像來過這裡。</p>
+  <p class="slow d2">陽光很暖，沒有人在打分數。</p>
+  <p class="slow d3">在這裡，停下來也沒有關係。</p>
+  <div class="links slow d3">
+    <a id="go-out" href="outside/">繼續往前走</a>
+    <a id="go-home" href="./">回到黎安國</a>
+  </div>
+</main>
+<script>
+  // GitHub Pages 的 404 可能出現在任何深度的網址，連結改用網站根目錄
+  (function () {
+    var base = '/';
+    var saved = null; try { saved = localStorage.getItem('lian_base'); } catch (e) {}
+    if (saved) { document.getElementById('go-out').href = saved + 'outside/'; document.getElementById('go-home').href = saved; return; }
+    var seg = location.pathname.split('/').filter(Boolean);
+    if (/github\.io$/.test(location.hostname) && seg.length && !/\.html?$/.test(seg[0])) base = '/' + seg[0] + '/';
+    document.getElementById('go-out').href = base + 'outside/';
+    document.getElementById('go-home').href = base;
+  })();
+</script>
+</body>
+</html>

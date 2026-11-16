@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>光榮徽章申請｜黎安國 國民生活入口網</title>
+<link rel="icon" href="img/x-icon.ico" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+<div class="page">
+  <header id="site-top"></header>
+  <main class="sub-main">
+    <p class="crumb"><a href="index.html">首頁</a> ＞ 便民服務 ＞ 光榮徽章申請</p>
+
+    <h1>光榮徽章　申請／換發</h1>
+    <section class="panel" id="badge-step">
+      <div class="feature">
+        <img src="img/door_badge.jpg" alt="門上的光榮徽章">
+        <div>
+          <p>「本戶無失敗成員」徽章，是對家庭努力的肯定。</p>
+          <p>申請前，請全家一同確認以下事項（依《國民成長手冊》第四篇）。<b>請據實勾選。</b></p>
+        </div>
+      </div>
+      <form id="badge-form">
+        <div class="form-row"><label for="b-house">戶號（例：光榮大樓七樓四號）</label><input type="text" id="b-house" maxlength="16" required autocomplete="off"></div>
+        <ul class="check-list">
+          <li><label><input type="checkbox"> 家庭成員皆了解自身年齡階段應完成的目標。</label></li>
+          <li><label><input type="checkbox"> 家庭成員皆已完成年度自我檢核。</label></li>
+          <li><label><input type="checkbox"> 家庭內無長期拒絕改善且影響其他成員之情形。</label></li>
+          <li><label><input type="checkbox"> 家庭成員能以適當方式互相提醒。</label></li>
+          <li><label><input type="checkbox"> 家庭已就未完成項目訂定改善計畫。</label></li>
+          <li><label><input type="checkbox"> 家庭整體表現維持穩定，且未出現持續下降之趨勢。</label></li>
+          <li><label><input type="checkbox"> 家庭成員願意配合必要的協助與評估。</label></li>
+          <li><label><input type="checkbox"> 本戶無失敗成員。</label></li>
+        </ul>
+        <button type="submit" class="btn">送出申請</button>
+      </form>
+    </section>
+    <section class="panel" id="badge-result" hidden>
+      <h2 id="br-title"></h2>
+      <div id="br-body"></div>
+      <p><a href="index.html">回首頁</a></p>
+    </section>
+
+  </main>
+  <footer id="site-foot"></footer>
+</div>
+<script src="common.js?v=12"></script>
+<script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    $('badge-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var boxes = document.querySelectorAll('#badge-form input[type=checkbox]');
+      var miss = 0;
+      Array.prototype.forEach.call(boxes, function (b) { if (!b.checked) miss++; });
+      var house = $('b-house').value.replace(/[<>&]/g, '');
+      if (miss === 0) {
+        $('br-title').textContent = '申請已受理：待到府查核';
+        $('br-body').innerHTML = '<p>' + house + '　您好：</p>' +
+          '<p>您已勾選全部項目。依規定，全部勾選之申請案，將由里辦公處<b>到府查核</b>，以確認勾選內容屬實。</p>' +
+          '<p>查核日期不另行通知。查核期間，請全家成員在家等候，並維持正常作息。</p>';
+      } else {
+        $('br-title').textContent = '審核結果：不予核發';
+        $('br-body').innerHTML = '<p>' + house + '　您好：</p>' +
+          '<p>經查，本戶尚有 <b>' + miss + '</b> 項未符標準。依《國民成長手冊》第四篇，<b>本戶現有徽章將予收回</b>，待相關情形改善後，得重新申請。</p>' +
+          '<p>建議優先由家庭內部進行溝通與調整。必要時，請預約<a href="care.html">國民保養中心</a>。</p>' +
+          '<p>本戶已列入下週重點巡查戶。</p>';
+      }
+      $('badge-step').hidden = true;
+      $('badge-result').hidden = false;
+    });
+  })();
+</script>
+</body>
+</html>
